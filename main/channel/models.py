@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 from django.db import models
+import datetime
 
 
 class Theme(models.Model):
@@ -25,7 +26,6 @@ class Thumb(models.Model):
 
     def __unicode__(self):
         return self.video.title    
-
 
 
 class Comment(models.Model):
@@ -53,5 +53,48 @@ class Video(models.Model):
     
     def __unicode__(self):
         return self.title
+
+    #Counting de thumbs up
+    def thumbs_up(self):
+        return Thumb.objects.filter(
+            is_positive=True).count()
+
+    #Counting de thumbs down
+    def thumbs_down(self):
+        return Thumb.objects.filter(
+            is_positive=False).count()
+
+    #Counting de comments up
+    def positive_comments(self):
+        return Comment.objects.filter(
+            is_positive=True).count()
+
+    #Counting de comments down
+    def negative_comments(self):
+        return Comment.objects.filter(
+            is_positive=False).count()
+
+    #Counting days since upload
+    def days_since_upload(self):
+        return (datetime.date.today() - self.date_uploaded).days
+
+    def timefactor(self):
+        return max(0, 1 - self.days_since_upload()/365)
+
+    def positivefactor(self):
+        return (0.7 * self.good_comments()) + (0.3 * self.good_thumbs())
+
+    def good_comments(self):
+        return self.positive_comments() / (self.positive_comments() +  self.negative_comments())
+
+    def good_thumbs(self):
+        return self.thumbs_up()  / (self.thumbs_up() + self.thumbs_down())
+
+    def score(self):
+        return self.views * self.timefactor() * self.positive_comments()
+
+    # Formula sucesso do canal
+    # Filtro pelo sucesso do canal, que usa a formula
+    # No save, nao permitir video com mais de 1 ano
 
 
