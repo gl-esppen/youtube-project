@@ -4,7 +4,7 @@ from django.db import models
 
 
 class Theme(models.Model):
-	name = models.CharField(max_length=150, verbose_name='Name')
+    name = models.CharField(max_length=150, verbose_name='Name')
 
     class Meta:
         verbose_name = "Theme"
@@ -15,31 +15,37 @@ class Theme(models.Model):
 
 
 class Thumb(models.Model):
-	is_positive = models.BooleanField(verbose_name='Liked?')
-	time = models.DateTimeField(verbose_name='Date/Time')
-	video = models.ForeignKey('Video', verbose_name='Video')
+    is_positive = models.BooleanField(verbose_name='Liked?')
+    time = models.DateTimeField(verbose_name='Date/Time')
+    video = models.ForeignKey('Video', verbose_name='Video')
 
     class Meta:
         verbose_name = "Thumb"
         verbose_name_plural = "Thumbs"
-    
+
+    def __unicode__(self):
+        return self.video.title    
+
 
 
 class Comment(models.Model):
-	is_positive = models.BooleanField(verbose_name='Liked?')
-	time = models.DateTimeField(verbose_name='Date/Time')
-	video = models.ForeignKey('Video', verbose_name='Video')
+    is_positive = models.BooleanField(verbose_name='Liked?')
+    time = models.DateTimeField(verbose_name='Date/Time')
+    video = models.ForeignKey('Video', verbose_name='Video')
 
     class Meta:
         verbose_name = "Comment"
         verbose_name_plural = "Comments"
 
+    def __unicode__(self):
+        return self.video.title 
+
 
 class Video(models.Model):
-	title = models.CharField(max_length=150, verbose_name='Title')
-	date_uploaded = models.DateTimeField(verbose_name='Date of Upload')
-	views = models.IntegerField(default=0, verbose_name='Number of Views')
-	themes = models.ManytoManyField(Theme, verbose_name='Themes')
+    title = models.CharField(max_length=150, verbose_name='Title')
+    date_uploaded = models.DateTimeField(verbose_name='Date of Upload')
+    views = models.IntegerField(default=0, verbose_name='Number of Views')
+    themes = models.ManyToManyField(Theme, verbose_name='Themes')
 
     class Meta:
         verbose_name = "Video"
@@ -47,3 +53,5 @@ class Video(models.Model):
     
     def __unicode__(self):
         return self.title
+
+
