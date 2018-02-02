@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+</head>
+<body>
+	<h3>Themes</h3>
+	{% for theme in popular_themes %}
+		<ul>
+			<li><span>Theme ID: </span>{{ theme.id }}</li>
+			<li><span>Theme Name: </span>{{ theme.theme }}</li>
+			<li><span>Theme Score: </span>{{ theme.score }}</li>
+		</ul>
+	{% empty %}
+		<p>Theme not found.</p>
+	{% endfor %}
+</body>
+</html>

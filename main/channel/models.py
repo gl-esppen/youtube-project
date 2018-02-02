@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 from django.db import models
+from django.core.exceptions import ValidationError
 import datetime
 
 
@@ -13,6 +14,24 @@ class Theme(models.Model):
     
     def __unicode__(self):
         return self.name
+
+    @classmethod
+    def get_popular_themes(cls):
+        current_theme = None
+        videos = []
+        popular_themes = []
+        for theme in cls.objects.all():
+            if cls.objects.all():
+                current_theme = theme
+                score = 0
+                videos = Video.objects.filter(themes=current_theme)
+                for video in videos:
+                    score += video.score()
+                popular_themes.append({'theme': theme.name, 'id': theme.id,  'score': score})
+
+            for video in videos:
+                score += video.score()
+        return sorted(popular_themes, key=lambda x: x['score'], reverse=True)
 
 
 class Thumb(models.Model):
@@ -76,13 +95,7 @@ class Video(models.Model):
 
     #Counting days since upload
     def days_since_upload(self):
-        return (datetime.date.today() - self.date_uploaded).days
-
-    def timefactor(self):
-        return max(0, 1 - self.days_since_upload()/365)
-
-    def positivefactor(self):
-        return (0.7 * self.good_comments()) + (0.3 * self.good_thumbs())
+        return (datetime.date.today() - self.date_uploaded.date()).days
 
     def good_comments(self):
         return self.positive_comments() / (self.positive_comments() +  self.negative_comments())
@@ -90,11 +103,15 @@ class Video(models.Model):
     def good_thumbs(self):
         return self.thumbs_up()  / (self.thumbs_up() + self.thumbs_down())
 
+    def timefactor(self):
+        return max(0, 1 - self.days_since_upload()/365)
+
+    def positivefactor(self):
+        return (0.7 * self.good_comments()) + (0.3 * self.good_thumbs())
+
     def score(self):
         return self.views * self.timefactor() * self.positive_comments()
 
-    # Formula sucesso do canal
-    # Filtro pelo sucesso do canal, que usa a formula
-    # No save, nao permitir video com mais de 1 ano
-
-
+    def clean(self):
+        if (datetime.date.today() - self.date_uploaded.date()).days > 365:
+            raise ValidationError('Video is more than 1 year old.')
